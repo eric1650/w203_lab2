@@ -1,5 +1,6 @@
 # w203_lab2
 
+```
 Folder Structure:
 .
 ├── README.md (this file)
@@ -37,3 +38,4 @@ Folder Structure:
     │       ├── readme.txt
     │       └── status-by_year.txt
     └── weather.csv.zip (clean weather data filtered by growing season, pumpkin locations)
+```
