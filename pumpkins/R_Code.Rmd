@@ -1,0 +1,128 @@
+---
+title: "W203 Lab 2"
+author: "w203 team 1"
+subtitle: 'w203: Lab 2 Pumpkin and weather impact'
+
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r load packages, message = FALSE}
+library(tidyverse)
+library(ggplot2) 
+
+library(sandwich)
+library(stargazer)
+library(lmtest)
+library(dplyr)
+library(readr)
+
+library(car)
+library(moments)
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r load data} 
+d_pumpkin <- read.csv("pumpkin.csv")
+d_weather <- read.csv("weather_consol.csv")
+```
+
+```{r conduct EDA in this chunk for pumpkin data}
+summary(d_pumpkin$weight_lbs)
+plot1 <- d_pumpkin %>%
+  ggplot(aes(x=weight_lbs)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of Pumpkin Weight")
+print(plot1)
+
+summary(d_pumpkin$est_weight)
+plot2 <- d_pumpkin %>%
+  ggplot(aes(x=est_weight)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of Estimated Weight")
+print(plot2)
+
+summary(d_pumpkin$ott)
+plot3 <- d_pumpkin %>%
+  ggplot(aes(x=ott)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of Over the top inches")
+print(plot3)
+
+
+
+
+```
+```{r conduct EDA in this chunk for weather data}
+summary(d_weather$rain_daily_avg)
+plot11 <- d_weather %>%
+  ggplot(aes(x=rain_daily_avg)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of daily avg rain")
+print(plot11)
+
+summary(d_weather$TMIN_AVG)
+plot12 <- d_weather %>%
+  ggplot(aes(x=TMIN_AVG)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of min temperature")
+print(plot12)
+
+summary(d_weather$TMAX_AVG)
+plot13 <- d_weather %>%
+  ggplot(aes(x=TMAX_AVG)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of max temperature")
+print(plot13)
+
+
+
+
+```
+
+``` {r}
+# Merging data sets
+
+d_total <- merge(d_pumpkin,d_weather,by.x = ("year","nearest_station"), by.y = ("year","station_id"))
+```
+
+
+```{r fit a regression model here}
+model1 <- lm(weight_lbs ~ rain_total+rain_daily_avg+TMIN_AVG+TMAX_AVG+factor(year) , data=d_total)
+
+model1
+stargazer(
+   model1, 
+   type = 'text', 
+   se = list(get_robust_se(model))
+   )
+
+
+
+```
+
+
+
+```{r code }
+model1_preds <- predict(model1)
+model1_resids <- resid(model1)
+
+plot1 <- ggplot(data=d_total, aes(model1_preds, model1_resids)) + geom_point() +
+stat_smooth()
+print(plot1)
+```
+
+> 
+
+```{r code and plots assessing normally distributed errors}
+plot(model1$residuals)
+
+hist(residuals(model1))
+boxplot(residuals(model1)) 
+jarque.test(model1$residuals)
+```
