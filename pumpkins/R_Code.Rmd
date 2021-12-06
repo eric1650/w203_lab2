@@ -1,6 +1,6 @@
 ---
 title: "W203 Lab 2"
-author: "w203 team 1"
+author: "w203 team 1: Kisha Kim, Patricia Gallagher, Sean Koval, Eric Ellestad"
 subtitle: 'w203: Lab 2 Pumpkin and weather impact'
 
 output:
@@ -11,13 +11,11 @@ output:
 ```{r load packages, message = FALSE}
 library(tidyverse)
 library(ggplot2) 
-
 library(sandwich)
 library(stargazer)
 library(lmtest)
 library(dplyr)
 library(readr)
-
 library(car)
 library(moments)
 ```
@@ -26,10 +24,8 @@ library(moments)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
 ```{r load data} 
-d_pumpkin <- read.csv("pumpkin.csv")
-d_weather <- read.csv("weather_consol.csv")
+d_pumpkin <- read.csv("pumpkin_consol.csv")
 ```
 
 ```{r conduct EDA in this chunk for pumpkin data}
@@ -59,23 +55,23 @@ print(plot3)
 
 ```
 ```{r conduct EDA in this chunk for weather data}
-summary(d_weather$rain_daily_avg)
-plot11 <- d_weather %>%
+summary(d_pumpkin$rain_daily_avg)
+plot11 <- d_pumpkin %>%
   ggplot(aes(x=rain_daily_avg)) + 
   geom_histogram(bins=100) + 
   ggtitle("Distribution of daily avg rain")
 print(plot11)
 
-summary(d_weather$TMIN_AVG)
-plot12 <- d_weather %>%
-  ggplot(aes(x=TMIN_AVG)) + 
+summary(d_pumpkin$TMIN)
+plot12 <- d_pumpkin %>%
+  ggplot(aes(x=TMIN)) + 
   geom_histogram(bins=100) + 
   ggtitle("Distribution of min temperature")
 print(plot12)
 
-summary(d_weather$TMAX_AVG)
-plot13 <- d_weather %>%
-  ggplot(aes(x=TMAX_AVG)) + 
+summary(d_pumpkin$TMAX)
+plot13 <- d_pumpkin %>%
+  ggplot(aes(x=TMAX)) + 
   geom_histogram(bins=100) + 
   ggtitle("Distribution of max temperature")
 print(plot13)
@@ -85,15 +81,9 @@ print(plot13)
 
 ```
 
-``` {r}
-# Merging data sets
-
-d_total <- merge(d_pumpkin,d_weather,by.x = ("year","nearest_station"), by.y = ("year","station_id"))
-```
-
 
 ```{r fit a regression model here}
-model1 <- lm(weight_lbs ~ rain_total+rain_daily_avg+TMIN_AVG+TMAX_AVG+factor(year) , data=d_total)
+model1 <- lm(weight_lbs ~ rain_total+rain_daily_avg+TMIN+TMAX+factor(year) , data=d_pumpkin)
 
 model1
 stargazer(
@@ -112,7 +102,7 @@ stargazer(
 model1_preds <- predict(model1)
 model1_resids <- resid(model1)
 
-plot1 <- ggplot(data=d_total, aes(model1_preds, model1_resids)) + geom_point() +
+plot1 <- ggplot(data=d_pumpkin, aes(model1_preds, model1_resids)) + geom_point() +
 stat_smooth()
 print(plot1)
 ```
