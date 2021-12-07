@@ -42,5 +42,6 @@ Folder Structure:
     │       ├── readme-by_year.txt
     │       ├── readme.txt
     │       └── status-by_year.txt
+    ├── weather.csv
     └── weather.csv.zip
 ```
