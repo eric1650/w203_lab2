@@ -18,6 +18,7 @@ library(dplyr)
 library(readr)
 library(car)
 library(moments)
+library(jtools)
 ```
 
 ```{r setup, include=FALSE}
@@ -25,8 +26,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r setup, include=FALSE}
-source('./src/load_and_clean.R')
-source('./src/get_robust_se.R')
+#source('./src/load_and_clean.R')
+#source('./src/get_robust_se.R')
 ```
 
 ```{r load data} 
@@ -113,23 +114,109 @@ stargazer(
 
 ```
 
+``` {r}
+coeftest(model1, vcov=vcovHC(model1))
+coeftest(model2, vcov=vcovHC(model2))
+coeftest(model3, vcov=vcovHC(model3))
+```
+
+
 
 
 ```{r code }
+# model 1
 model1_preds <- predict(model1)
 model1_resids <- resid(model1)
+# model 2
+model2_preds <- predict(model2)
+model2_resids <- resid(model2)
+# model 3
+model3_preds <- predict(model3)
+model3_resids <- resid(model3)
 
 plot1 <- ggplot(data=d_pumpkin, aes(model1_preds, model1_resids)) + geom_point() +
 stat_smooth()
 print(plot1)
+
+plot2 <- ggplot(data=d_pumpkin, aes(model2_preds, model2_resids)) + geom_point() +
+stat_smooth()
+print(plot2)
+
+# TODO: this had an error when running.
+#plot3 <- ggplot(data=d_pumpkin, aes(model3_preds, model3_resids)) + geom_point() +
+#stat_smooth()
+#print(plot3)
 ```
 
-> 
 
 ```{r code and plots assessing normally distributed errors}
 plot(model1$residuals)
-
+plot(model2$residuals)
+plot(model3$residuals)
+# model 1
 hist(residuals(model1))
 boxplot(residuals(model1)) 
 jarque.test(model1$residuals)
+# model 2
+hist(residuals(model2))
+boxplot(residuals(model2)) 
+jarque.test(model2$residuals)
+# model 3
+hist(residuals(model3))
+boxplot(residuals(model3)) 
+jarque.test(model3$residuals)
+```
+
+```{r code plotting residuals}
+plot_errors_1 <- d_pumpkin %>% 
+  ggplot(aes(x=model1_resids)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of Residuals Model1")
+print(plot_errors_1)
+
+plot_errors_2 <- d_pumpkin %>% 
+  ggplot(aes(x=model2_resids)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of Residuals Model2")
+print(plot_errors_2)
+# TODO: Same error as aboe 'aesthetics must be either length 1 or the same...'
+#plot_errors_3 <- d_pumpkin %>% 
+#  ggplot(aes(x=model3_resids)) + 
+#  geom_histogram(bins=100) + 
+#  ggtitle("Distribution of Residuals Model3")
+#print(plot_errors_3)
+
+qqplot_1 <- d_pumpkin %>% 
+  ggplot(aes(sample=model1_resids)) + 
+  stat_qq() + stat_qq_line() +
+  ggtitle("QQPlot of Residuals Model1")
+print(qqplot_1)
+
+qqplot_2 <- d_pumpkin %>% 
+  ggplot(aes(sample=model2_resids)) + 
+  stat_qq() + stat_qq_line() +
+  ggtitle("QQPlot of Residuals Model2")
+print(qqplot_2)
+# TODO: Same error as the above for model 3
+#qqplot_3 <- d_pumpkin %>% 
+#  ggplot(aes(sample=model3_resids)) + 
+#  stat_qq() + stat_qq_line() +
+#  ggtitle("QQPlot of Residuals Model3")
+#print(qqplot_3)
+```
+
+```{r code comparing models}
+# model 1 vs model 2
+anova(model1, model2)
+# model 2 vs model 3 - model 2 and 3 were not fitted on the same sized dataset
+#anova(model2,model3)
+# Same error as above
+# model 1 vs model 3
+# anova(model1, model3)
+# There are aliased variables (causing error) meaning they are perfectly linear dependent on others. Need to find what those are
+#waldtest(model1, model2, model3)
+```
+```{r code to find those aliased variables}
+# looks like the relationship to rain total?
+alias(model1)
 ```
