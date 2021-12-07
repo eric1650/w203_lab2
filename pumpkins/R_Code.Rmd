@@ -24,6 +24,11 @@ library(moments)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r setup, include=FALSE}
+source('./src/load_and_clean.R')
+source('./src/get_robust_se.R')
+```
+
 ```{r load data} 
 d_pumpkin <- read.csv("pumpkin_consol.csv")
 ```
@@ -84,14 +89,26 @@ print(plot13)
 
 ```{r fit a regression model here}
 model1 <- lm(weight_lbs ~ rain_total+rain_daily_avg+TMIN+TMAX+factor(year) , data=d_pumpkin)
+model2 <- lm(weight_lbs ~ rain_total+rain_daily_avg+TMIN+TMAX+factor(year)+rain_daily_stdev , data=d_pumpkin)
+model3 <- lm(weight_lbs ~ rain_total+rain_daily_avg+TMIN+TMAX+factor(year) +rain_daily_stdev +est_weight, data=d_pumpkin)
 
-model1
 stargazer(
    model1, 
    type = 'text', 
-   se = list(get_robust_se(model))
+   se = list(get_robust_se(model1))
    )
 
+stargazer(
+   model2, 
+   type = 'text', 
+   se = list(get_robust_se(model2))
+   )
+
+stargazer(
+   model3, 
+   type = 'text', 
+   se = list(get_robust_se(model3))
+   )
 
 
 ```
