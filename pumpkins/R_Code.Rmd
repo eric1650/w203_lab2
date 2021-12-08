@@ -37,7 +37,7 @@ d_pumpkin <- read.csv("pumpkin_consol.csv")
 ```{r conduct EDA in this chunk for pumpkin data}
 summary(d_pumpkin$weight_lbs)
 plot1 <- d_pumpkin %>%
-  ggplot(aes(x=weight_lbs)) + 
+  ggplot(aes(x=log(weight_lbs))) + 
   geom_histogram(bins=100) + 
   ggtitle("Distribution of Pumpkin Weight")
 print(plot1)
@@ -61,37 +61,65 @@ print(plot3)
 
 ```
 ```{r conduct EDA in this chunk for weather data}
-summary(d_pumpkin$rain_daily_avg)
-plot11 <- d_pumpkin %>%
-  ggplot(aes(x=rain_daily_avg)) + 
-  geom_histogram(bins=100) + 
-  ggtitle("Distribution of daily avg rain")
-print(plot11)
+#summary(d_pumpkin$rain_daily_avg)
+#plot11 <- d_pumpkin %>%
+ # ggplot(aes(x=rain_daily_avg)) + 
+  #geom_histogram(bins=100) + 
+  #ggtitle("Distribution of daily avg rain")
+#print(plot11)
 
-summary(d_pumpkin$TMIN)
+summary(d_pumpkin$TMIN_AVG)
 plot12 <- d_pumpkin %>%
-  ggplot(aes(x=TMIN)) + 
+  ggplot(aes(x=TMIN_AVG)) + 
   geom_histogram(bins=100) + 
   ggtitle("Distribution of min temperature")
 print(plot12)
 
-summary(d_pumpkin$TMAX)
+summary(d_pumpkin$TMAX_AVG)
 plot13 <- d_pumpkin %>%
-  ggplot(aes(x=TMAX)) + 
+  ggplot(aes(x=TMAX_AVG)) + 
   geom_histogram(bins=100) + 
   ggtitle("Distribution of max temperature")
 print(plot13)
 
+summary(d_pumpkin$TMAX_STDEV)
+plot14 <- d_pumpkin %>%
+  ggplot(aes(x=TMAX_STDEV)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of max temperature")
+print(plot14)
 
 
+summary(d_pumpkin$TMIN_STDEV)
+plot15 <- d_pumpkin %>%
+  ggplot(aes(x=TMIN_STDEV)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of max temperature")
+print(plot15)
+
+
+
+#d_filter <- d_pumpkin %>%
+ # filter(TMIN_AVG > 0) %>% 
+  #filter(TMAX_AVG >0) %>% 
+  
 
 ```
 
 
 ```{r fit a regression model here}
-model1 <- lm(weight_lbs ~ rain_total+rain_daily_avg+TMIN+TMAX+factor(year) , data=d_pumpkin)
-model2 <- lm(weight_lbs ~ rain_total+rain_daily_avg+TMIN+TMAX+factor(year)+rain_daily_stdev , data=d_pumpkin)
-model3 <- lm(weight_lbs ~ rain_total+rain_daily_avg+TMIN+TMAX+factor(year) +rain_daily_stdev +est_weight, data=d_pumpkin)
+model1 <- lm(weight_lbs ~ TMIN_AVG+TMAX_AVG+PRCP_AVG , data=d_pumpkin)
+model2 <- lm(weight_lbs ~ TMIN_AVG+TMAX_AVG+PRCP_AVG+factor(type) , data=d_pumpkin)
+model3 <- lm(log(weight_lbs) ~ TMIN_AVG+TMAX_AVG+PRCP_AVG+factor(type) , data=d_pumpkin, na.action = na.exclude)
+model4 <- lm(log(weight_lbs) ~ TMIN_AVG+TMAX_AVG+PRCP_AVG+factor(type)+factor(year)+TMIN_STDEV+TMAX_STDEV+PRCP_STDEV , data=d_pumpkin, na.action = na.exclude)
+
+require(nlme)
+anova.lme(model3, model4)
+
+
+#model3 <- lm(weight_lbs ~ PRCP_AVG+TMIN_AVG+TMAX_AVG+factor(year) + factor(type), data=d_pumpkin)
+#model4 <- lm(weight_lbs ~ PRCP_AVG+TMIN_AVG+TMAX_AVG+ factor(type), data=d_pumpkin)
+#model5 <- lm(log(weight_lbs) ~ PRCP_AVG+TMIN_AVG+TMAX_AVG+factor(year) + factor(type), data=d_pumpkin)
 
 stargazer(
    model1, 
@@ -111,6 +139,14 @@ stargazer(
    se = list(get_robust_se(model3))
    )
 
+stargazer(
+   model4, 
+   type = 'text', 
+   se = list(get_robust_se(model4))
+   )
+
+
+
 
 ```
 
@@ -118,10 +154,30 @@ stargazer(
 coeftest(model1, vcov=vcovHC(model1))
 coeftest(model2, vcov=vcovHC(model2))
 coeftest(model3, vcov=vcovHC(model3))
+coeftest(model4, vcov=vcovHC(model4))
 ```
 
 
+```{r code comparing models}
+# model 1 vs model 2
+anova(model1, model2)
+# model 2 vs model 3 - model 2 and 3 were not fitted on the same sized dataset
+anova(model3,model4)
+# Same error as above
+# model 1 vs model 3
+# anova(model1, model3)
+# There are aliased variables (causing error) meaning they are perfectly linear dependent on others. Need to find what those are
 
+library(aod)
+wald.test(model1, model2, model3)
+?wald.test
+
+```
+
+```{r code to find those aliased variables}
+# looks like the relationship to rain total?
+alias(model1)
+```
 
 ```{r code }
 # model 1
@@ -133,6 +189,9 @@ model2_resids <- resid(model2)
 # model 3
 model3_preds <- predict(model3)
 model3_resids <- resid(model3)
+# model 4
+model4_preds <- predict(model4)
+model4_resids <- resid(model4)
 
 plot1 <- ggplot(data=d_pumpkin, aes(model1_preds, model1_resids)) + geom_point() +
 stat_smooth()
@@ -165,6 +224,15 @@ jarque.test(model2$residuals)
 hist(residuals(model3))
 boxplot(residuals(model3)) 
 jarque.test(model3$residuals)
+
+
+#kurtosis(model$residuals)-3
+
+#shapiro.test(model$residuals)
+#bptest(log(mtcars$mpg)~mtcars$disp+mtcars$hp+mtcars$wt+mtcars$drat)
+
+
+
 ```
 
 ```{r code plotting residuals}
@@ -205,18 +273,3 @@ print(qqplot_2)
 #print(qqplot_3)
 ```
 
-```{r code comparing models}
-# model 1 vs model 2
-anova(model1, model2)
-# model 2 vs model 3 - model 2 and 3 were not fitted on the same sized dataset
-#anova(model2,model3)
-# Same error as above
-# model 1 vs model 3
-# anova(model1, model3)
-# There are aliased variables (causing error) meaning they are perfectly linear dependent on others. Need to find what those are
-#waldtest(model1, model2, model3)
-```
-```{r code to find those aliased variables}
-# looks like the relationship to rain total?
-alias(model1)
-```
