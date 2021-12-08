@@ -8,6 +8,11 @@ output:
   html_document: default
 ---
 
+``` {r install missing packages}
+#install.packages("moments")
+#install.packages("jtools")
+```
+
 ```{r load packages, message = FALSE}
 library(tidyverse)
 library(ggplot2) 
@@ -32,9 +37,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r load data} 
 d_pumpkin <- read.csv("pumpkin_consol.csv")
+colnames(d_pumpkin)
 ```
 
-```{r conduct EDA in this chunk for pumpkin data}
+```{r conduct EDA in this chunk for LHS pumpkin variables}
 summary(d_pumpkin$weight_lbs)
 plot1 <- d_pumpkin %>%
   ggplot(aes(x=log(weight_lbs))) + 
@@ -57,52 +63,79 @@ plot3 <- d_pumpkin %>%
 print(plot3)
 
 
-
-
 ```
-```{r conduct EDA in this chunk for weather data}
-#summary(d_pumpkin$rain_daily_avg)
-#plot11 <- d_pumpkin %>%
- # ggplot(aes(x=rain_daily_avg)) + 
-  #geom_histogram(bins=100) + 
-  #ggtitle("Distribution of daily avg rain")
-#print(plot11)
+
+
+
+```{r conduct EDA in this chunk for TMIN variables}
 
 summary(d_pumpkin$TMIN_AVG)
-plot12 <- d_pumpkin %>%
+plot11 <- d_pumpkin %>%
   ggplot(aes(x=TMIN_AVG)) + 
   geom_histogram(bins=100) + 
-  ggtitle("Distribution of min temperature")
+  ggtitle("Distribution of avg min temperature")
+print(plot11)
+
+summary(d_pumpkin$TMIN_STDEV)
+plot12 <- d_pumpkin %>%
+  ggplot(aes(x=TMIN_STDEV)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of stdev of min temp")
 print(plot12)
+
+```
+
+``` {r conduct EDA in this chunk for TMAX variables}
 
 summary(d_pumpkin$TMAX_AVG)
 plot13 <- d_pumpkin %>%
   ggplot(aes(x=TMAX_AVG)) + 
   geom_histogram(bins=100) + 
-  ggtitle("Distribution of max temperature")
+  ggtitle("Distribution of avg max temperature")
 print(plot13)
 
 summary(d_pumpkin$TMAX_STDEV)
 plot14 <- d_pumpkin %>%
   ggplot(aes(x=TMAX_STDEV)) + 
   geom_histogram(bins=100) + 
-  ggtitle("Distribution of max temperature")
+  ggtitle("Distribution of stdev max temperature")
 print(plot14)
 
+```
 
-summary(d_pumpkin$TMIN_STDEV)
+``` {r conduct EDA in this chunk for MIN/MAX DIFF variables}
+
+summary(d_pumpkin$TEMP_DIFF_AVG)
 plot15 <- d_pumpkin %>%
-  ggplot(aes(x=TMIN_STDEV)) + 
+  ggplot(aes(x=TEMP_DIFF_AVG)) + 
   geom_histogram(bins=100) + 
-  ggtitle("Distribution of max temperature")
+  ggtitle("Distribution of avg MIN/MAX differential")
 print(plot15)
 
+summary(d_pumpkin$TEMP_DIFF_STDEV)
+plot16 <- d_pumpkin %>%
+  ggplot(aes(x=TEMP_DIFF_STDEV)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of stdev MIN/MAX differential")
+print(plot16)
 
+```
 
-#d_filter <- d_pumpkin %>%
- # filter(TMIN_AVG > 0) %>% 
-  #filter(TMAX_AVG >0) %>% 
-  
+``` {r conduct EDA in this chunk for temp range variables}
+
+summary(d_pumpkin$TEMP_ABOVE_MIN)
+plot17 <- d_pumpkin %>%
+  ggplot(aes(x=TEMP_ABOVE_MIN)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of count of days per year above min temp")
+print(plot17)
+
+summary(d_pumpkin$TEMP_BELOW_MAX)
+plot18 <- d_pumpkin %>%
+  ggplot(aes(x=TEMP_BELOW_MAX)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of count of days per year below max temp")
+print(plot18)
 
 ```
 
@@ -113,8 +146,8 @@ model2 <- lm(weight_lbs ~ TMIN_AVG+TMAX_AVG+PRCP_AVG+factor(type) , data=d_pumpk
 model3 <- lm(log(weight_lbs) ~ TMIN_AVG+TMAX_AVG+PRCP_AVG+factor(type) , data=d_pumpkin, na.action = na.exclude)
 model4 <- lm(log(weight_lbs) ~ TMIN_AVG+TMAX_AVG+PRCP_AVG+factor(type)+factor(year)+TMIN_STDEV+TMAX_STDEV+PRCP_STDEV , data=d_pumpkin, na.action = na.exclude)
 
-require(nlme)
-anova.lme(model3, model4)
+#require(nlme)
+anova(model3, model4, test="F")
 
 
 #model3 <- lm(weight_lbs ~ PRCP_AVG+TMIN_AVG+TMAX_AVG+factor(year) + factor(type), data=d_pumpkin)
@@ -160,17 +193,17 @@ coeftest(model4, vcov=vcovHC(model4))
 
 ```{r code comparing models}
 # model 1 vs model 2
-anova(model1, model2)
+anova(model1, model2, test="F")
 # model 2 vs model 3 - model 2 and 3 were not fitted on the same sized dataset
-anova(model3,model4)
+anova(model3, model4, test="F")
 # Same error as above
 # model 1 vs model 3
-# anova(model1, model3)
+#anova(model1, model3, test="F")
 # There are aliased variables (causing error) meaning they are perfectly linear dependent on others. Need to find what those are
 
-library(aod)
-wald.test(model1, model2, model3)
-?wald.test
+#library(aod)
+#wald.test(model1, model2, model3)
+#?wald.test
 
 ```
 
