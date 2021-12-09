@@ -49,7 +49,11 @@ Weather data was obtained from [National Oceanographic and Atmospheric Associati
 
 The Pumpkin Dataset included city and state the pumpkin was grown, so we merged this with a City Coordinate Dataset to bring latitude and longitude data into the Pumpkin data. The weather data was downloaded by year and included weather stations all over the world, so we filtered down to just stations in the United States and combined with a weather station coordinate supporting dataset in order to bring latitude and longitude data into the weather data.
 
-Once we had latitude and longitude data in both our Pumpkin and Weather data, we ran a search algorithm that identified for each pumpkin what its nearest weather station was. We then filtered the weather dataset down to just include weather stations marked as nearest a pumpkin record. Then we were ready to aggregate the time series weather data into our target explanatory weather variables:
+Once we had latitude and longitude data in both our Pumpkin and Weather data, we ran a search algorithm that identified for each pumpkin what its nearest weather station was. We then filtered the weather dataset down to just include weather stations marked as nearest a pumpkin record. Then we were ready to aggregate the time series weather data into our target explanatory weather variables.
+
+
+![Weather Data Aggregation and Integration with Pumpkin Data](images_for_report/Data_Integration.png)
+#### Aggregating Weather Data into Target Explanatory Variables:
 
 - **`TMIN_AVG`**
   - A `TMIN_AVG` value was caculated for each weather station for each year of pumpkin data (2013 - 2021). This variable is the average of the minimum daily temperature over the months of the growing season (May through September) for the given year. The units are in tenths of a degree celsius, so 200 represents 20.0 degrees C.
@@ -67,13 +71,11 @@ Once we had latitude and longitude data in both our Pumpkin and Weather data, we
   - A `TEMP_BELOW_MAX` value was caculated for each weather station for each year of pumpkin data (2013 - 2021). Given temperatures for ideal growing conditions based on the literature are below 95F / 35C, this variable is a count of the number of days in a given growing season (May - September) that the maximum daily temperature did NOT exceed 35C (TMAX <= 350).
 - **`TEMP_ABOVE_MINN`**
   - A `TEMP_ABOVE_MINN` value was caculated for each weather station for each year of pumpkin data (2013 - 2021). Given temperatures for ideal growing conditions based on the literature are above 65F / 18.3C, this variable is a count of the number of days in a given growing season (May - September) that the maximum daily temperature exceeded 18.3C (TMAX >= 183).
-  
-
-![Weather Data Aggregation and Integration with Pumpkin Data](images_for_report/Data_Integration.png)
 
 ### Data Cleaning and Accounting Tables
 
 ![Weather Cleaning, Filtration, and Aggregation Accounting Table](images_for_report/weather_acct.png)
+
 
 
 ![Pumpkin Cleaning, Filtration, and Merging with Weather Data Accounting Table](images_for_report/pumpkin_acct.png)
