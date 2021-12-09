@@ -39,10 +39,8 @@ knitr::opts_chunk$set(echo = TRUE)
 d_pumpkin <- read.csv("pumpkin_consol.csv")
 colnames(d_pumpkin)
 d_pumpkin <- d_pumpkin %>%
-  filter(type !="Long Gourd") %>%
-  filter(type !="Tomato")
-#d_pumpkin <- d_pumpkin %>%
-#  filter(type =="Giant Pumpkin")
+  filter(type !="Long Gourd")
+
 ```
 
 ```{r conduct EDA in this chunk for LHS pumpkin variables}
@@ -57,7 +55,19 @@ print(plot1)
 
 #TODO: Add histgrams to Filter by type 
 
+summary(d_pumpkin$est_weight)
+plot2 <- d_pumpkin %>%
+  ggplot(aes(x=est_weight)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of Estimated Weight")
+print(plot2)
 
+summary(d_pumpkin$ott)
+plot3 <- d_pumpkin %>%
+  ggplot(aes(x=ott)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of Over the top inches")
+print(plot3)
 
 
 
@@ -101,6 +111,23 @@ print(plot14)
 
 ```
 
+``` {r conduct EDA in this chunk for MIN/MAX DIFF variables}
+
+summary(d_pumpkin$TEMP_DIFF_AVG)
+plot15 <- d_pumpkin %>%
+  ggplot(aes(x=TEMP_DIFF_AVG)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of avg MIN/MAX differential")
+print(plot15)
+
+summary(d_pumpkin$TEMP_DIFF_STDEV)
+plot16 <- d_pumpkin %>%
+  ggplot(aes(x=TEMP_DIFF_STDEV)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of stdev MIN/MAX differential")
+print(plot16)
+
+```
 
 ``` {r conduct EDA in this chunk for temp range variables}
 
@@ -118,30 +145,17 @@ plot18 <- d_pumpkin %>%
   ggtitle("Distribution of count of days per year below max temp")
 print(plot18)
 
-
-#d_pumpkin_2 <- d_pumpkin %>%
-#  filter(TEMP_BELOW_MAX > 100)
-
-#summary(d_pumpkin$TEMP_BELOW_MAX)
-#plot118 <- d_pumpkin_2 %>%
-#  ggplot(aes(x=log(TEMP_BELOW_MAX))) + 
-#  geom_histogram(bins=100) + 
- # ggtitle("Distribution of count of days per year below max temp")
-#print(plot118)
 ```
 
 
 ```{r fit a regression model here}
 model1 <- lm(weight_lbs ~ TMIN_AVG+TMAX_AVG+PRCP_AVG , data=d_pumpkin)
-#model2 <- lm(weight_lbs ~ TMIN_AVG+TMAX_AVG+PRCP_AVG , data=d_pumpkin)
-#model3 <- lm(log(weight_lbs) ~ TMIN_AVG+TMAX_AVG+PRCP_AVG , data=d_pumpkin, na.action = na.exclude)
-#model4 <- lm(log(weight_lbs) ~ TMIN_AVG+TMAX_AVG+PRCP_AVG+factor(year)+TMIN_STDEV+TMAX_STDEV+PRCP_STDEV , data=d_pumpkin, na.action = na.exclude)
-#model5 <- lm(log(weight_lbs) ~  TMIN_AVG + TMAX_AVG + PRCP_AVG +factor(year)+ TMIN_STDEV + TMAX_STDEV + PRCP_STDEV + TEMP_BELOW_MAX + TEMP_ABOVE_MIN, data=d_pumpkin)
-
 model2 <- lm(weight_lbs ~ TMIN_AVG+TMAX_AVG+PRCP_AVG+factor(type) , data=d_pumpkin)
 model3 <- lm(log(weight_lbs) ~ TMIN_AVG+TMAX_AVG+PRCP_AVG+factor(type) , data=d_pumpkin, na.action = na.exclude)
 model4 <- lm(log(weight_lbs) ~ TMIN_AVG+TMAX_AVG+PRCP_AVG+factor(type)+factor(year)+TMIN_STDEV+TMAX_STDEV+PRCP_STDEV , data=d_pumpkin, na.action = na.exclude)
-model5 <- lm(log(weight_lbs) ~  TMIN_AVG + TMAX_AVG + PRCP_AVG +factor(type)+factor(year)+ TMIN_STDEV + TMAX_STDEV + PRCP_STDEV + TEMP_BELOW_MAX + TEMP_ABOVE_MIN, data=d_pumpkin)
+
+#require(nlme)
+anova(model3, model4, test="F")
 
 
 #model3 <- lm(weight_lbs ~ PRCP_AVG+TMIN_AVG+TMAX_AVG+factor(year) + factor(type), data=d_pumpkin)
@@ -172,12 +186,6 @@ stargazer(
    se = list(get_robust_se(model4))
    )
 
-stargazer(
-   model5, 
-   type = 'text', 
-   se = list(get_robust_se(model5))
-   )
-
 
 
 
@@ -188,7 +196,6 @@ coeftest(model1, vcov=vcovHC(model1))
 coeftest(model2, vcov=vcovHC(model2))
 coeftest(model3, vcov=vcovHC(model3))
 coeftest(model4, vcov=vcovHC(model4))
-coeftest(model5, vcov=vcovHC(model5))
 ```
 
 
@@ -199,7 +206,6 @@ anova(model1, model2, test="F")
 # model 2 vs model 3 - model 2 and 3 were not fitted on the same sized dataset
 anova(model3, model4, test="F")
 #p value is smaller than 0.05, reject the null hypothesis. The full model, model4, is a better fit.
-anova(model4, model5, test="F")
 
 # Same error as above
 # model 1 vs model 3
@@ -231,10 +237,6 @@ model3_resids <- resid(model3)
 model4_preds <- predict(model4)
 model4_resids <- resid(model4)
 
-# model 5
-model5_preds <- predict(model5)
-model5_resids <- resid(model5)
-
 plot1 <- ggplot(data=d_pumpkin, aes(model1_preds, model1_resids)) + geom_point() +
 stat_smooth()
 print(plot1)
@@ -251,10 +253,6 @@ print(plot3)
 plot4 <- ggplot(data=d_pumpkin, aes(model4_preds, model4_resids)) + geom_point() +
 stat_smooth()
 print(plot4)
-
-plot5 <- ggplot(data=d_pumpkin, aes(model5_preds, model5_resids)) + geom_point() +
-stat_smooth()
-print(plot5)
 ```
 
 
@@ -262,9 +260,6 @@ print(plot5)
 plot(model1$residuals)
 plot(model2$residuals)
 plot(model3$residuals)
-plot(model4$residuals)
-plot(model5$residuals)
-
 # model 1
 hist(residuals(model1))
 boxplot(residuals(model1)) 
@@ -285,12 +280,6 @@ hist(residuals(model4))
 boxplot(residuals(model4)) 
 jarque.test(model4$residuals)
 plot(model4)
-
-# model 5
-hist(residuals(model5))
-boxplot(residuals(model5)) 
-jarque.test(model5$residuals)
-plot(model5)
 
 
 #kurtosis(model$residuals)-3
@@ -327,12 +316,6 @@ plot_errors_4 <- d_pumpkin %>%
   ggtitle("Distribution of Residuals Model4")
 print(plot_errors_4)
 
-plot_errors_5 <- d_pumpkin %>% 
-  ggplot(aes(x=model5_resids)) + 
-  geom_histogram(bins=100) + 
-  ggtitle("Distribution of Residuals Model5")
-print(plot_errors_5)
-
 qqplot_1 <- d_pumpkin %>% 
   ggplot(aes(sample=model1_resids)) + 
   stat_qq() + stat_qq_line() +
@@ -356,12 +339,5 @@ qqplot_4 <- d_pumpkin %>%
   stat_qq() + stat_qq_line() +
   ggtitle("QQPlot of Residuals Model4")
 print(qqplot_4)
-
-qqplot_5 <- d_pumpkin %>% 
-  ggplot(aes(sample=model5_resids)) + 
-  stat_qq() + stat_qq_line() +
-  ggtitle("QQPlot of Residuals Model5")
-print(qqplot_5)
-
 ```
 
