@@ -1,0 +1,385 @@
+---
+title: "W203 Lab 2"
+author: "w203 team 1: Kisha Kim, Patricia Gallagher, Sean Koval, Eric Ellestad"
+subtitle: 'w203: Lab 2 Pumpkin and weather impact'
+
+output:
+  pdf_document: default
+  html_document: default
+---
+### 1. An Introduction
+
+
+
+
+
+
+### 2. A description of the Data and Research Design
+
+
+``` {r install missing packages, echo = FALSE}
+#install.packages("moments")
+#install.packages("jtools")
+```
+
+```{r load packages, message = FALSE, echo = FALSE }
+library(tidyverse)
+library(ggplot2) 
+library(sandwich)
+library(stargazer)
+library(lmtest)
+library(dplyr)
+library(readr)
+library(car)
+library(moments)
+library(jtools)
+```
+
+```{r setup, include=FALSE, echo = FALSE }
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r load data, echo = FALSE } 
+d_pumpkin <- read.csv("pumpkin_consol.csv")
+d_pumpkin <- d_pumpkin %>%
+  filter(type !="Long Gourd") 
+```
+
+
+### 2a. A Model Building Process
+
+
+Most data filtering is explained in above section 2. See below for EDAs, where key variables used in the model are plotted:
+
+Pumpkin weights are evenly distributed looking at above histogram. There are bumps and these explain the even distribution for each type of pumpkin. 
+
+
+```{r conduct EDA in this chunk for LHS pumpkin variables, echo = FALSE }
+#summary(d_pumpkin$weight_lbs)
+
+
+plot1 <- d_pumpkin %>%
+  ggplot(aes(x=log(weight_lbs))) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of Pumpkin Weight")
+print(plot1)
+
+#TODO: Add histgrams to Filter by type 
+
+
+
+
+
+```
+
+All weather related variables - Average Precipitation, Average Minimum Temperature, Average Maximum Temperature, minimum temperature standard deviation, maximum temperature standard deviation, precipitation standard deviation are evenly distributed.
+
+
+```{r conduct EDA in this chunk for TMIN variables, echo = FALSE }
+
+#summary(d_pumpkin$TMIN_AVG)
+plot11 <- d_pumpkin %>%
+  ggplot(aes(x=TMIN_AVG)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of avg min temperature")
+print(plot11)
+
+#summary(d_pumpkin$TMIN_STDEV)
+plot12 <- d_pumpkin %>%
+  ggplot(aes(x=TMIN_STDEV)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of stdev of min temp")
+print(plot12)
+
+```
+
+``` {r conduct EDA in this chunk for TMAX variables, echo = FALSE }
+
+#summary(d_pumpkin$TMAX_AVG)
+plot13 <- d_pumpkin %>%
+  ggplot(aes(x=TMAX_AVG)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of avg max temperature")
+print(plot13)
+
+#summary(d_pumpkin$TMAX_STDEV)
+plot14 <- d_pumpkin %>%
+  ggplot(aes(x=TMAX_STDEV)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of stdev max temperature")
+print(plot14)
+
+```
+
+
+``` {r conduct EDA in this chunk for temp range variables, echo = FALSE }
+
+#summary(d_pumpkin$TEMP_ABOVE_MIN)
+plot17 <- d_pumpkin %>%
+  ggplot(aes(x=TEMP_ABOVE_MIN)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of count of days per year above min temp")
+print(plot17)
+
+#summary(d_pumpkin$TEMP_BELOW_MAX)
+plot18 <- d_pumpkin %>%
+  ggplot(aes(x=TEMP_BELOW_MAX)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of count of days per year below max temp")
+print(plot18)
+
+```
+
+
+After the initial data analysis, the conducted research attempted to prove the below model:
+$$
+  Weight = Average Precipitation + Average Minimum Temperature + Average Maximum Temperature 
+$$ 
+
+The output variable the team wanted to measure was the weight of the pumpkin, weight_lbs.
+
+>A. We started with a model with only key variables, model1, where minimum temperature, maximum temperature, and precipitation was taken as the predictor. The R^2 value for this initial model was very low, ​​0.021.
+>__model1: weight_lbs ~ TMIN_AVG+TMAX_AVG+PRCP_AVG __
+
+
+>B. In order to improve the model, in model2, we’ve added the type as a covariate. The assumption here was that even though all pumpkin/tomatoes measured in this data set are in the same family, the type could impact the weight of the pumpkin. This increased the R^2 value to 0.460, but this was still not optimal.
+>__model2: weight_lbs ~ MIN_AVG+TMAX_AVG+PRCP_AVG+type __
+
+>C. In the next model, model3, we took a log transformation of the output variable. Taking the log transformation of the output variable drastically improved the linearity of the model with increased the R^2 value to 0.838.
+>__model3: log transformation of weight_lbs ~ MIN_AVG+TMAX_AVG+PRCP_AVG+type __
+
+>D. Adding on to this model, we’ve created a longer model, model4, by adding in weather-related variables, such as minimum temperature standard deviation, maximum temperature standard deviation, precipitation standard deviation, and year as a covariate. This resulted in R^2 value of 0.840.
+>__model4: log transformation of weight_lbs ~ MIN_AVG+TMAX_AVG+PRCP_AVG+type+year+TMIN_STDEV+TMAX_STDEV+PRCP_STDEV__
+
+>E. In the longest model, model5, we’ve added in variables like the number of days that exceeded the maximum temperature, and the minimum temperature. This concluded in the R^2 of 0.841.
+>__model5: log transformation of weight_lbs ~ MIN_AVG+TMAX_AVG+PRCP_AVG+type+year+TMIN_STDEV+TMAX_STDEV+PRCP_STDEV+TEMP_BELOW_MAX + TEMP_ABOVE_MIN__
+
+In the model, both type and the year as covariates greatly helped achieve our modeling goals, proven in the increased R^2 values. This explains that the same weather conditions could impact the size of the pumpkin differently depending on the year, and the variety of the pumpkin.
+
+
+
+```{r fit a regression model here, echo = FALSE }
+model1 <- lm(weight_lbs ~ TMIN_AVG+TMAX_AVG+PRCP_AVG , data=d_pumpkin)
+model2 <- lm(weight_lbs ~ TMIN_AVG+TMAX_AVG+PRCP_AVG+factor(type) , data=d_pumpkin)
+model3 <- lm(log(weight_lbs) ~ TMIN_AVG+TMAX_AVG+PRCP_AVG+factor(type) , data=d_pumpkin, na.action = na.exclude)
+model4 <- lm(log(weight_lbs) ~ TMIN_AVG+TMAX_AVG+PRCP_AVG+factor(type)+factor(year)+TMIN_STDEV+TMAX_STDEV+PRCP_STDEV , data=d_pumpkin, na.action = na.exclude)
+model5 <- lm(log(weight_lbs) ~  TMIN_AVG + TMAX_AVG + PRCP_AVG +factor(type)+factor(year)+ TMIN_STDEV + TMAX_STDEV + PRCP_STDEV + TEMP_BELOW_MAX + TEMP_ABOVE_MIN, data=d_pumpkin)
+
+
+stargazer(
+   model1, model2,
+   type = 'text', 
+   se = list(get_robust_se(model1),get_robust_se(model2))
+)   
+
+
+stargazer(
+   model3, model4,model5,
+   type = 'text', 
+   se = list(get_robust_se(model3),get_robust_se(model4), model5)
+)   
+
+stargazer(
+   model1, model3, model5,
+   type = 'text', 
+   se = list(get_robust_se(model1),get_robust_se(model3),get_robust_se(model5))
+   )
+
+
+
+```
+Once the models are built, F-test was conducted to compare few models:
+
+
+- Model 1 vs Model2 : p-value was lower than 0.05, which rejects the null hypothesis. This proves that the full model, model2 is a better model.
+```{r code comparing models1, echo=FALSE}
+anova(model1, model2, test="F")
+
+```
+- Model 3 vs Model 4: p-value was lower than 0.05, which rejects the null hypothesis. This proves that the full model, model4 is a better model.
+```{r code comparing models2, echo=FALSE}
+anova(model3, model4, test="F")
+
+```
+- Model 4 vs Model 5: p-value was lower than 0.05, which rejects the null hypothesis. This proves that the full model, model5 is a better model.
+```{r code comparing models3, echo=FALSE}
+anova(model4, model5, test="F")
+
+```
+This aligns with the R^2 value from above as well.
+
+
+
+
+### 4. A Results Section
+
+``` {r}
+coeftest(model1, vcov=vcovHC(model1))
+coeftest(model2, vcov=vcovHC(model2))
+coeftest(model3, vcov=vcovHC(model3))
+coeftest(model4, vcov=vcovHC(model4))
+coeftest(model5, vcov=vcovHC(model5))
+```
+
+
+
+```{r code }
+# model 1
+model1_preds <- predict(model1)
+model1_resids <- resid(model1)
+# model 2
+model2_preds <- predict(model2)
+model2_resids <- resid(model2)
+# model 3
+model3_preds <- predict(model3)
+model3_resids <- resid(model3)
+# model 4
+model4_preds <- predict(model4)
+model4_resids <- resid(model4)
+
+# model 5
+model5_preds <- predict(model5)
+model5_resids <- resid(model5)
+
+plot1 <- ggplot(data=d_pumpkin, aes(model1_preds, model1_resids)) + geom_point() +
+stat_smooth()
+print(plot1)
+
+plot2 <- ggplot(data=d_pumpkin, aes(model2_preds, model2_resids)) + geom_point() +
+stat_smooth()
+print(plot2)
+
+
+plot3 <- ggplot(data=d_pumpkin, aes(model3_preds, model3_resids)) + geom_point() +
+stat_smooth()
+print(plot3)
+
+plot4 <- ggplot(data=d_pumpkin, aes(model4_preds, model4_resids)) + geom_point() +
+stat_smooth()
+print(plot4)
+
+plot5 <- ggplot(data=d_pumpkin, aes(model5_preds, model5_resids)) + geom_point() +
+stat_smooth()
+print(plot5)
+```
+
+
+```{r code and plots assessing normally distributed errors}
+plot(model1$residuals)
+plot(model2$residuals)
+plot(model3$residuals)
+plot(model4$residuals)
+plot(model5$residuals)
+
+# model 1
+hist(residuals(model1))
+boxplot(residuals(model1)) 
+jarque.test(model1$residuals)
+# model 2
+hist(residuals(model2))
+boxplot(residuals(model2)) 
+jarque.test(model2$residuals)
+plot(model2)
+
+# model 3
+hist(residuals(model3))
+boxplot(residuals(model3)) 
+jarque.test(model3$residuals)
+
+# model 4
+hist(residuals(model4))
+boxplot(residuals(model4)) 
+jarque.test(model4$residuals)
+plot(model4)
+
+# model 5
+hist(residuals(model5))
+boxplot(residuals(model5)) 
+jarque.test(model5$residuals)
+plot(model5)
+
+
+#kurtosis(model$residuals)-3
+
+#shapiro.test(model$residuals)
+#bptest(log(mtcars$mpg)~mtcars$disp+mtcars$hp+mtcars$wt+mtcars$drat)
+
+
+
+```
+
+```{r code plotting residuals}
+plot_errors_1 <- d_pumpkin %>% 
+  ggplot(aes(x=model1_resids)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of Residuals Model1")
+print(plot_errors_1)
+
+plot_errors_2 <- d_pumpkin %>% 
+  ggplot(aes(x=model2_resids)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of Residuals Model2")
+print(plot_errors_2)
+# TODO: Same error as aboe 'aesthetics must be either length 1 or the same...'
+plot_errors_3 <- d_pumpkin %>% 
+  ggplot(aes(x=model3_resids)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of Residuals Model3")
+print(plot_errors_3)
+
+plot_errors_4 <- d_pumpkin %>% 
+  ggplot(aes(x=model4_resids)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of Residuals Model4")
+print(plot_errors_4)
+
+plot_errors_5 <- d_pumpkin %>% 
+  ggplot(aes(x=model5_resids)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of Residuals Model5")
+print(plot_errors_5)
+
+qqplot_1 <- d_pumpkin %>% 
+  ggplot(aes(sample=model1_resids)) + 
+  stat_qq() + stat_qq_line() +
+  ggtitle("QQPlot of Residuals Model1")
+print(qqplot_1)
+
+qqplot_2 <- d_pumpkin %>% 
+  ggplot(aes(sample=model2_resids)) + 
+  stat_qq() + stat_qq_line() +
+  ggtitle("QQPlot of Residuals Model2")
+print(qqplot_2)
+# TODO: Same error as the above for model 3
+qqplot_3 <- d_pumpkin %>% 
+  ggplot(aes(sample=model3_resids)) + 
+  stat_qq() + stat_qq_line() +
+  ggtitle("QQPlot of Residuals Model3")
+print(qqplot_3)
+
+qqplot_4 <- d_pumpkin %>% 
+  ggplot(aes(sample=model4_resids)) + 
+  stat_qq() + stat_qq_line() +
+  ggtitle("QQPlot of Residuals Model4")
+print(qqplot_4)
+
+qqplot_5 <- d_pumpkin %>% 
+  ggplot(aes(sample=model5_resids)) + 
+  stat_qq() + stat_qq_line() +
+  ggtitle("QQPlot of Residuals Model5")
+print(qqplot_5)
+
+```
+
+
+### 5. Limitations of your Model 
+
+#### 5a. Statistical limitations of your model
+
+
+#### 5b. Structural limitations of your model
+
+
+### 7. Conclusion
+
