@@ -1,7 +1,7 @@
 ---
 title: "W203 Lab 2"
 author: 'w203 team 1: Kisha Kim, Patricia Gallagher, Sean Koval, Eric Ellestad'
-subtitle: 'w203: Lab 2 Pumpkin and weather impact'
+subtitle: 'Impact of Weather and Environmental on Giant Pumpkins'
 output:
   pdf_document: default
   html_document: default
@@ -9,7 +9,7 @@ output:
 ---
 ## 1. An Introduction
 
-Giant Pumpkin competitions have grown in popularity over time and have evolved into a highly competitive sport among farmers with substantial cash prizes and even an organizing body called the [Great Pumpkin Commonwealth (GPC)](https://gpc1.org/) that establishes standards, eligibility requirements, and hosts regional competitions that enable qualification into an annual national championship. While giant pumpkins were the original and are the largest and most popular GPC category, other plant species from the Cucurbitaceae (“Cucurbit”) family can be entered which includes field pumpkins, squashes, gourds, and watermelons. A niche but passionate community of growers, researchers, and aficionados have developed novel seed genetics as well as cultivation techniques in order to maximize the harvest weight of this family of gourds, with [champion pumpkins frequently weighing in at over 2,000 lbs](https://abc7news.com/half-moon-bay-pumpkin-weigh-off-winner-biggest-2021-peninsula-patch/11112151/).
+Giant Pumpkin competitions have grown in popularity over time and have evolved into a highly competitive sport among farmers with substantial cash prizes and even an organizing body called the Great Pumpkin Commonwealth (GPC) [5] that establishes standards, eligibility requirements, and hosts regional competitions that enable qualification into an annual national championship. While giant pumpkins were the original and are the largest and most popular GPC category, other plant species from the Cucurbitaceae (“Cucurbit”) family can be entered which includes field pumpkins, squashes, gourds, and watermelons. A niche but passionate community of growers, researchers, and aficionados have developed novel seed genetics as well as cultivation techniques in order to maximize the harvest weight of this family of gourds, with champion pumpkins frequently weighing in at over 2,000 lbs [8].
 
 While there are many factors that a grower can control that contribute to the harvest weight of a pumpkin and other Cucurbits such as choice of seed genetics, cultivation method, and the skill of the grower, one of the most important factors in pumpkin plant growth and fruit production is environmental conditions such as temperature and precipitation. The goal of this research study is to investigate the impact of environmental factors on the weight of Cucurbits entered into official GPC competitions in the United States and determine whether certain climate conditions, and therefore geographic location, have an advantage over others when choosing where to grow a competitive giant pumpkin or Cucurbit.
 
@@ -19,33 +19,33 @@ Our research question is:
 
 In order to answer this question, we evaluated all competitive entries in official GPC competitions from 2013 - 2021 and modeled the official competition weight of the pumpkin or Cucurbit as a function of the weather conditions it was grown under. Given weather is a complex system and pumpkins are grown over many months, we considered several different aggregated weather metrics such as maximum daily temperature, minimum daily temperature, amount of daily precipitation.
 
-According to the [Penn State College of Agricultural Sciences](https://extension.psu.edu/pumpkin-production)
+According to the Penn State College of Agricultural Sciences [9]:
 
 > *Pumpkins are very sensitive to cold temperatures (below 50°F) and plants and fruit will exhibit injury from even a slight frost. The best average temperature range for pumpkin production during the growing season is between 65 and 95°F; temperatures above 95°F or below 50°F slow growth and maturity of the crop. Pumpkins require a constant supply of available moisture during the growing season. Water deficiency or stress, especially during the blossom and fruit set periods, may cause blossoms and fruits to drop, resulting in reduced yields and smaller-sized fruits.*
 
 Given this, we looked at maximum and minimum daily temperatures, their average and variability over the growing season, as well as metrics that track the frequency of extreme temperatures. We will also look at the amount of daily precipitation, its average and variability over the growing season.
 
 
-
 ## 2. A description of the Data and Research Design
 
 ### Causal Model and Research Design
 
-Based on horticultural literature and practical pumpkin growing guides, we identified a number of factors that impact the growth rate, fruit quality, and ultimately the size the of the harvested fruit. Given there was limited data captured regarding the practices used in production for pumpkins in the GPC dataset, our analysis focuses on the environmental factors such as temperature and precipitation. We analyze potential omitted variable bias in section 5.
+Based on horticultural literature and practical pumpkin growing guides, we identified a number of factors that impact the growth rate, fruit quality, and ultimately the size the of the harvested fruit [1][5][6][7][9]. Given there was limited data captured regarding the practices used in production for pumpkins in the GPC dataset, our analysis focuses on the environmental factors such as temperature and precipitation. We analyze potential omitted variable bias in section 5.
 
 ![Cucurbit Harvest Weight Causal Relationships](images_for_report/causal_model.png)
 
+
 ### Pumpkin/Cucurbit Data
 
-We obtained official GPC weights of pumpkins, tomatoes, squashes, and watermelons from the [Giant Pumpkins](https://github.com/rfordatascience/tidytuesday/tree/master/data/2021/2021-10-19) data set which was pulled from [www.bigpumpkins.com](www.bigpumpkins.com). This data set included the city and state it was grown in, the year of the competition, and the type of the Cucurbit (Giant Pumpkin, Field Pumpkin, Giant Squash, Giant Watermelon, or Tomato).
+We obtained official GPC weights of pumpkins, tomatoes, squashes, and watermelons from the Giant Pumpkins data [4] set which was pulled from [www.bigpumpkins.com](www.bigpumpkins.com). This data set included the city and state it was grown in, the year of the competition, and the type of the Cucurbit (Giant Pumpkin, Field Pumpkin, Giant Squash, Giant Watermelon, or Tomato).
 
 ### City Coordinate Data:
 
-City coordinate data was obtained from the [World Cities Database](https://www.kaggle.com/max-mind/world-cities-database) on Kaggle. This data was used to cross reference cities in the official GPC weight dataset and determine their latitude and longitude.
+City coordinate data was obtained from the World Cities Database [10] on Kaggle. This data was used to cross reference cities in the official GPC weight dataset and determine their latitude and longitude.
 
 ### Weather Data:
 
-Weather data was obtained from [National Oceanographic and Atmospheric Association Climate Data](https://www.climate.gov/maps-data/dataset/daily-temperature-and-precipitation-reports-data-tables) which provided daily minimum temperature, daily maximum temperature, daily rainfall, and other climate data from weather stations across the United States. The coordinates of each pumpkin/Cucurbit was compared to the coordinates of all weather stations to determine its weather station. The relevant weather metrics were then aggregated over the relevant growing season for the relevant year and associated with that pumpkin/Cucurbit record.
+Weather data was obtained from National Oceanographic and Atmospheric Association Climate Data [2] which provided daily minimum temperature, daily maximum temperature, daily rainfall, and other climate data from weather stations across the United States. The coordinates of each pumpkin/Cucurbit was compared to the coordinates of all weather stations to determine its weather station. The relevant weather metrics were then aggregated over the relevant growing season for the relevant year and associated with that pumpkin/Cucurbit record.
 
 ### Dataset Preparation and Integration
 
@@ -57,6 +57,7 @@ Once we had latitude and longitude data in both our Pumpkin and Weather data, we
 
 
 ![Weather Data Aggregation and Integration with Pumpkin Data](images_for_report/Data_Integration.png)
+
 #### Aggregating Weather Data into Target Explanatory Variables:
 
 Once we had filtered the weather data down to measurements of relevant from stations near pumpkin records and subsetted based on the growing season, we calculated the summary environmental variables that we used in the regression mnodels:
@@ -395,23 +396,23 @@ The second limitation was missing data within our pumpkin data set. We omitted t
 
 ## 8. References
 
-> 1. The Great Pumpkin Commonwealth. 27 Oct. 2014, gpc1.org/.
+> 1. “Beginner’s Seminar Presentation.” Great Pumpkin Commonwealth, Great Pumpkin Commonwealth, gpc1.org/wp-content/uploads/2019/02/beginners-power-point.ppt.
 
-> 2. “GPC Weighoff Results and Information.” Www.bigpumpkins.com, www.bigpumpkins.com/ViewArticle.asp?id=132.
+> 2. Daily Temperature and Precipitation Reports - Data Tables. National Oceanographic and Atmospheric Administration, www.climate.gov/maps-data/dataset/daily-temperature-and-precipitation-reports-data-tables.
 
 > 3. GPC Rules and Handbook. Great Pumpkin Commonwealth, 1 Mar. 2021.
 
-> 4. Daily Temperature and Precipitation Reports - Data Tables. National Oceanographic and Atmospheric Administration, www.climate.gov/maps-data/dataset/daily-temperature-and-precipitation-reports-data-tables.
+> 4. “GPC Weighoff Results and Information.” Www.bigpumpkins.com, www.bigpumpkins.com/ViewArticle.asp?id=132.
 
-> 5. “World Cities Database.” Kaggle.com, www.kaggle.com/max-mind/world-cities-database.
+> 5. The Great Pumpkin Commonwealth. 27 Oct. 2014, gpc1.org/.
 
-> 6. Penn State Extension. “Pumpkin Production.” Penn State Extension, 20 June 2005, extension.psu.edu/pumpkin-production.
+> 6. Group, EMILY FABER, Sinclair Broadcast. “Growing These Massive One-Ton Pumpkins Takes a Green Thumb and the Perfect Seed.” WJLA, 29 Oct. 2020, wjla.com/news/offbeat/growing-these-massive-one-ton-pumpkins-takes-a-green-thumb-and-the-perfect-seed.
 
-> 7. KGO. “2,191-Pound Mega Gourd Wins World Championship Pumpkin Weigh-off in Half Moon Bay.” ABC7 San Francisco, 11 Oct. 2021, abc7news.com/half-moon-bay-pumpkin-weigh-off-winner-biggest-2021-peninsula-patch/11112151/. Accessed 9 Dec. 2021.
+> 7. “How to Grow a Giant Pumpkin.” Www.pumpkinfest.org, www.pumpkinfest.org/giant-vegetables/how-to-grow-a-giant-pumpkin/.
 
-> 8. “How to Grow a Giant Pumpkin.” Www.pumpkinfest.org, www.pumpkinfest.org/giant-vegetables/how-to-grow-a-giant-pumpkin/.
+> 8. KGO. “2,191-Pound Mega Gourd Wins World Championship Pumpkin Weigh-off in Half Moon Bay.” ABC7 San Francisco, 11 Oct. 2021, abc7news.com/half-moon-bay-pumpkin-weigh-off-winner-biggest-2021-peninsula-patch/11112151/.
 
-> 9. Group, EMILY FABER, Sinclair Broadcast. “Growing These Massive One-Ton Pumpkins Takes a Green Thumb and the Perfect Seed.” WJLA, 29 Oct. 2020, wjla.com/news/offbeat/growing-these-massive-one-ton-pumpkins-takes-a-green-thumb-and-the-perfect-seed.
+> 9. Penn State Extension. “Pumpkin Production.” Penn State Extension, 20 June 2005, extension.psu.edu/pumpkin-production.
 
-> 10. “Beginner’s Seminar Presentation.” Great Pumpkin Commonwealth, Great Pumpkin Commonwealth, gpc1.org/wp-content/uploads/2019/02/beginners-power-point.ppt.
+> 10. “World Cities Database.” Kaggle.com, www.kaggle.com/max-mind/world-cities-database.
 
