@@ -27,9 +27,13 @@ Given this, we looked at maximum and minimum daily temperatures, their average a
 
 
 
-
-
 ## 2. A description of the Data and Research Design
+
+### Causal Model and Research Design
+
+Based on horticultural literature and practical pumpkin growing guides, we identified a number of factors that impact the growth rate, fruit quality, and ultimately the size the of the harvested fruit. Given there was limited data captured regarding the practices used in production for pumpkins in the GPC dataset, our analysis focuses on the environmental factors such as temperature and precipitation. We analyze potential omitted variable bias in section 5.
+
+![Cucurbit Harvest Weight Causal Relationships](images_for_report/causal_model.png)
 
 ### Pumpkin/Cucurbit Data
 
@@ -55,6 +59,8 @@ Once we had latitude and longitude data in both our Pumpkin and Weather data, we
 ![Weather Data Aggregation and Integration with Pumpkin Data](images_for_report/Data_Integration.png)
 #### Aggregating Weather Data into Target Explanatory Variables:
 
+Once we had filtered the weather data down to measurements of relevant from stations near pumpkin records and subsetted based on the growing season, we calculated the summary environmental variables that we used in the regression mnodels:
+
 - **`TMIN_AVG`**
   - A `TMIN_AVG` value was caculated for each weather station for each year of pumpkin data (2013 - 2021). This variable is the average of the minimum daily temperature over the months of the growing season (May through September) for the given year. The units are in tenths of a degree celsius, so 200 represents 20.0 degrees C.
 - **`TMAX_AVG`**
@@ -76,10 +82,12 @@ Once we had latitude and longitude data in both our Pumpkin and Weather data, we
 
 ![Weather Cleaning, Filtration, and Aggregation Accounting Table](images_for_report/weather_acct.png)
 
+The weather dataset included many other measurements above and beyond temperature and precipitation, but unfortunately they were only collected at a very small subset of stations which would have reduced the granularity of our localized weather data to meaninglessness. We selected variables that were relevant to the causal model and also had robustness to their completeness and availability.
 
 
 ![Pumpkin Cleaning, Filtration, and Merging with Weather Data Accounting Table](images_for_report/pumpkin_acct.png)
 
+The pumpkin data included additional variables, but were not used due to incomplete and inconsistently recorded data that would have removed the majority of the records from the dataset.
 
 
 ``` {r install missing packages, echo = FALSE}
@@ -372,15 +380,7 @@ Below is additional interpretations of the significant variable coefficients not
   -An increase in the TMAX_AVG temperature by one degree will decrease the weight of the cucurbit by 0.03 pounds. 
 
 
-
-
-
-## 5. Limitations of your Model 
-
-### 5a. Statistical limitations of your model
-
-
-### 5b. Structural limitations of your model
+### 5. Structural limitations of your model
 
 There were many structural limitations to building a regression model with the combined dataset we chose. The first limitation was our lack of access to data around irrigation systems and amount of sunlight exposed to the Cucurbits. This is important as the net water intake during the growing season is a combination of precipitation and supplemental watering. The omitted variable regarding irrigation and other forms of watering created positive omitted variable bias by overemphasizing the estimation of the right hand variable - precipitation - with the outcome variable. Alongside supplemental watering, another opportunity for omitted variable bias comes from omitting the amount of sunlight the Cucurbits received. The variable has a causal relationship with our outcome variable and is correlated with the precipitation variable that we used in our regression. The sunlight variable was omitted due to lack of data and likely has a positive bias effect on the model further supporting the notion that the precipitation variable is overestimated in the model.
 
