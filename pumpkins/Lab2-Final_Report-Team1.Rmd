@@ -85,7 +85,7 @@ d_pumpkin <- d_pumpkin %>%
 
 Most data filtering is explained in above section 2. See below for EDAs, where key variables used in the model are plotted:
 
-Pumpkin weights are evenly distributed looking at above histogram. There are bumps and these explain the even distribution for each type of pumpkin. 
+Pumpkin weights are evenly distributed looking at below histogram - Figure 3. There are bumps and these explain the even distribution for each type of pumpkin. 
 
 
 ```{r conduct EDA in this chunk for LHS pumpkin variables, echo = FALSE }
@@ -95,7 +95,7 @@ Pumpkin weights are evenly distributed looking at above histogram. There are bum
 plot1 <- d_pumpkin %>%
   ggplot(aes(x=log(weight_lbs))) + 
   geom_histogram(bins=100) + 
-  ggtitle("Distribution of Pumpkin Weight")
+  ggtitle("Figure 3: Distribution of Pumpkin Weight")
 print(plot1)
 
 #TODO: Add histgrams to Filter by type 
@@ -106,7 +106,7 @@ print(plot1)
 
 ```
 
-All weather related variables - Average Precipitation, Average Minimum Temperature, Average Maximum Temperature, minimum temperature standard deviation, maximum temperature standard deviation, precipitation standard deviation are evenly distributed.
+All weather related variables - Average Precipitation, Average Minimum Temperature, Average Maximum Temperature, minimum temperature standard deviation, maximum temperature standard deviation, precipitation standard deviation are evenly distributed. Refer to Figure 4 - 9 below.
 
 
 ```{r conduct EDA in this chunk for TMIN variables, echo = FALSE }
@@ -115,14 +115,14 @@ All weather related variables - Average Precipitation, Average Minimum Temperatu
 plot11 <- d_pumpkin %>%
   ggplot(aes(x=TMIN_AVG)) + 
   geom_histogram(bins=100) + 
-  ggtitle("Distribution of avg min temperature")
+  ggtitle("Figure 4: Distribution of avg min temperature")
 print(plot11)
 
 #summary(d_pumpkin$TMIN_STDEV)
 plot12 <- d_pumpkin %>%
   ggplot(aes(x=TMIN_STDEV)) + 
   geom_histogram(bins=100) + 
-  ggtitle("Distribution of stdev of min temp")
+  ggtitle("Figure 5: Distribution of stdev of min temp")
 print(plot12)
 
 ```
@@ -133,14 +133,14 @@ print(plot12)
 plot13 <- d_pumpkin %>%
   ggplot(aes(x=TMAX_AVG)) + 
   geom_histogram(bins=100) + 
-  ggtitle("Distribution of avg max temperature")
+  ggtitle("Figure 6: Distribution of avg max temperature")
 print(plot13)
 
 #summary(d_pumpkin$TMAX_STDEV)
 plot14 <- d_pumpkin %>%
   ggplot(aes(x=TMAX_STDEV)) + 
   geom_histogram(bins=100) + 
-  ggtitle("Distribution of stdev max temperature")
+  ggtitle("Figure 7: Distribution of stdev max temperature")
 print(plot14)
 
 ```
@@ -152,14 +152,14 @@ print(plot14)
 plot17 <- d_pumpkin %>%
   ggplot(aes(x=TEMP_ABOVE_MIN)) + 
   geom_histogram(bins=100) + 
-  ggtitle("Distribution of count of days per year above min temp")
+  ggtitle("Figure 8: Distribution of count of days per year above min temp")
 print(plot17)
 
 #summary(d_pumpkin$TEMP_BELOW_MAX)
 plot18 <- d_pumpkin %>%
   ggplot(aes(x=TEMP_BELOW_MAX)) + 
   geom_histogram(bins=100) + 
-  ggtitle("Distribution of count of days per year below max temp")
+  ggtitle("Figure 9: Distribution of count of days per year below max temp")
 print(plot18)
 
 ```
@@ -202,22 +202,24 @@ model5 <- lm(log(weight_lbs) ~  TMIN_AVG + TMAX_AVG + PRCP_AVG +factor(type)+fac
 
 stargazer(
    model1, model2,
-   type = 'text', 
-   se = list(get_robust_se(model1),get_robust_se(model2))
-)   
+   type = 'text')
+#, 
+ #  se = list(get_robust_se(model1),get_robust_se(model2))
+#)   
 
 
 stargazer(
    model3, model4,model5,
-   type = 'text', 
-   se = list(get_robust_se(model3),get_robust_se(model4), model5)
-)   
+   type = 'text')
+   #,se = list(get_robust_se(model3),get_robust_se(model4), model5)
+#)   
 
 stargazer(
    model1, model3, model5,
-   type = 'text', 
-   se = list(get_robust_se(model1),get_robust_se(model3),get_robust_se(model5))
-   )
+   type = 'text')
+#, 
+ #  se = list(get_robust_se(model1),get_robust_se(model3),get_robust_se(model5))
+  # )
 
 
 
@@ -240,7 +242,7 @@ anova(model3, model4, test="F")
 anova(model4, model5, test="F")
 
 ```
-This aligns with the R^2 value from above as well.
+This aligns with the R^2 value from above as well. Per the F-test analysis and the R^2, we have decided to proceed with model 5 to validate assumptions and run additional tests to observe the regression fit.
 
 
 
@@ -256,6 +258,10 @@ coeftest(model5, vcov=vcovHC(model5))
 ```
 
 
+
+Due to the size of our data set, we've validated OLS Large Sample assumptions.
+
+Additionaly, we still ran additional tests against Classical Linear Model assumptions. Regardless of these results, 
 
 ```{r code }
 # model 1
