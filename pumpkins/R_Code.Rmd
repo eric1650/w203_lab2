@@ -194,8 +194,11 @@ coeftest(model4, vcov=vcovHC(model4))
 ```{r code comparing models}
 # model 1 vs model 2
 anova(model1, model2, test="F")
+#p value is smaller than 0.05, reject the null hypothesis. The full model, model2, is a better fit.
 # model 2 vs model 3 - model 2 and 3 were not fitted on the same sized dataset
 anova(model3, model4, test="F")
+#p value is smaller than 0.05, reject the null hypothesis. The full model, model4, is a better fit.
+
 # Same error as above
 # model 1 vs model 3
 #anova(model1, model3, test="F")
@@ -234,10 +237,14 @@ plot2 <- ggplot(data=d_pumpkin, aes(model2_preds, model2_resids)) + geom_point()
 stat_smooth()
 print(plot2)
 
-# TODO: this had an error when running.
-#plot3 <- ggplot(data=d_pumpkin, aes(model3_preds, model3_resids)) + geom_point() +
-#stat_smooth()
-#print(plot3)
+
+plot3 <- ggplot(data=d_pumpkin, aes(model3_preds, model3_resids)) + geom_point() +
+stat_smooth()
+print(plot3)
+
+plot4 <- ggplot(data=d_pumpkin, aes(model4_preds, model4_resids)) + geom_point() +
+stat_smooth()
+print(plot4)
 ```
 
 
@@ -253,10 +260,18 @@ jarque.test(model1$residuals)
 hist(residuals(model2))
 boxplot(residuals(model2)) 
 jarque.test(model2$residuals)
+plot(model2)
+
 # model 3
 hist(residuals(model3))
 boxplot(residuals(model3)) 
 jarque.test(model3$residuals)
+
+# model 4
+hist(residuals(model4))
+boxplot(residuals(model4)) 
+jarque.test(model4$residuals)
+plot(model4)
 
 
 #kurtosis(model$residuals)-3
@@ -281,11 +296,17 @@ plot_errors_2 <- d_pumpkin %>%
   ggtitle("Distribution of Residuals Model2")
 print(plot_errors_2)
 # TODO: Same error as aboe 'aesthetics must be either length 1 or the same...'
-#plot_errors_3 <- d_pumpkin %>% 
-#  ggplot(aes(x=model3_resids)) + 
-#  geom_histogram(bins=100) + 
-#  ggtitle("Distribution of Residuals Model3")
-#print(plot_errors_3)
+plot_errors_3 <- d_pumpkin %>% 
+  ggplot(aes(x=model3_resids)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of Residuals Model3")
+print(plot_errors_3)
+
+plot_errors_4 <- d_pumpkin %>% 
+  ggplot(aes(x=model4_resids)) + 
+  geom_histogram(bins=100) + 
+  ggtitle("Distribution of Residuals Model4")
+print(plot_errors_4)
 
 qqplot_1 <- d_pumpkin %>% 
   ggplot(aes(sample=model1_resids)) + 
@@ -299,10 +320,16 @@ qqplot_2 <- d_pumpkin %>%
   ggtitle("QQPlot of Residuals Model2")
 print(qqplot_2)
 # TODO: Same error as the above for model 3
-#qqplot_3 <- d_pumpkin %>% 
-#  ggplot(aes(sample=model3_resids)) + 
-#  stat_qq() + stat_qq_line() +
-#  ggtitle("QQPlot of Residuals Model3")
-#print(qqplot_3)
+qqplot_3 <- d_pumpkin %>% 
+  ggplot(aes(sample=model3_resids)) + 
+  stat_qq() + stat_qq_line() +
+  ggtitle("QQPlot of Residuals Model3")
+print(qqplot_3)
+
+qqplot_4 <- d_pumpkin %>% 
+  ggplot(aes(sample=model4_resids)) + 
+  stat_qq() + stat_qq_line() +
+  ggtitle("QQPlot of Residuals Model4")
+print(qqplot_4)
 ```
 
