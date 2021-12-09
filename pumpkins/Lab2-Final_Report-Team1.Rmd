@@ -276,6 +276,30 @@ anova(model4, model5, test="F")
 ```
 This aligns with the R^2 value from above as well. Per the F-test analysis and the R^2, we have decided to proceed with model 5 to validate assumptions and run additional tests to observe the regression fit.
 
+## 3. Model Assumptions
+
+Due to the size of our data set, we utilized an OLS Large Sample model. Below is a discussion of the model assumptions.
+
+**Independently and Identically Distributed**
+Our data includes a certain amount of dependency due to a) standard practices for cucurbit growing and harvesting and b) geographic similarities. However, our data is relatively granular since the fruit attributes are observed at the individual level and the weather data is observed by stations rather than at a more highly aggregated level. The size of the dataset should also help to offset loss of power caused by any dependency.
+
+Furthermore, our model utilizes data for several types of cucurbits. This can potentially be seen as a violation of the identically distributed assumption. However, since all types of fruit included in our dataset belong to the cucurbit family and are affected by weather patterns in similar ways, we concluded that this violation was negligible. Additionally, within each type of cucurbit, the data should be identically distributed. 
+
+**No Perfect Collinearity and Unique BLP**
+Perfect collinearity exists when multiple variables from a model contribute the same information. In other words, the perfectly collinear variables are related to the point that including all of them adds no additional value to the data. The model can instead be simplified to use the linear transformation of just one of the variables. 
+
+Within R, variables are dropped from models if they exhibit perfect collinearity with another variable. When running coefficient tests on the models included in this report, since none of the variables were dropped, we can assume that no perfect collinearity exists in our models. Furthermore, since there is no perfect collinearity, we can also conclude that a Best Linear Predictor exists for our models. 
+
+For completeness, we also tested our model against the Classical Linear model assumptions that were not discussed above.
+
+**Homoscedasticity**
+An additional assumption of the classical linear model is that the variance of the residuals is constant, or homoscedastic. To test this assumption, we plotted the residuals against the predicted values. A plot for a model with homoscedastic residuals would show points evenly distributed. For our main model (model5), there were large amounts of clustering. When taking into account the different types of Cucurbits included in this model, the clustering is intuitive. Within each cluster, the data points were relatively evenly distributed. Therefore, we concluded that our model met the homoscedasticity requirement reasonably well. 
+
+**Linear Conditional Expectations**
+Furthermore, the classical linear model assumes linear conditional expectations. To test this assumption, we again plotted the model residuals against the predicted values. In these plots, we also included a smoothing curve to better distinguish the linearity of the data points. While we observed nonlinear smoothing curves for most of our models, our main model (model5) plot showed reasonably (although admittedly not perfectly) linear data. Therefore, we concluded that model5 met the linear conditional expectations assumption. 
+
+**Normally Distributed Errors**
+Finally, the classical linear model assumes normally distributed residuals. To test the normality of the residuals, we created a histogram of the residuals for each of the models. Each of our models failed this assumption. However, since we utilized over eleven thousand data points for our model, we can apply the central limit theorem to our residuals and assume that the distribution of our errors does not compromise the validity of our t-tests. 
 
 
 
@@ -289,11 +313,36 @@ coeftest(model4, vcov=vcovHC(model4))
 coeftest(model5, vcov=vcovHC(model5))
 ```
 
+Below are the results of the five regression models discussed in the previous section. The dependent variable for the first two models was cucurbit weight in pounds. The dependent variable for the last three models was the log of the cucurbit weight in pounds. 
 
+In our main model (model5), most of the independent variables were shown to be statistically significant with the exception of the precipitation variables. (We hypothesized that the insignificance of precipitation might be due to well controlled irrigation systems developed by growers.) 
 
-Due to the size of our data set, we've validated OLS Large Sample assumptions.
+Cucurbit type had the most effect on our model. For our model, Field Pumpkins were used as our base type. The effect of type is very intuitive; the type of cucurbit will have a very large effect on the expected size of the fruit. Our interpretations of the type coefficients are as follows:
+  -Giant Pumpkin: All else being equal, a giant pumpkin will weigh 2.248 pounds more than a field pumpkin.
+  -Giant Squash: All else being equal, a giant squash will weigh 1.672 pounds more than a field pumpkin.
+  -Giant Watermelon: All else being equal, a giant watermelon will weigh 0.521 pounds more than a field pumpkin.
+  -Tomato: All else being equal, a tomato will weigh 3.217 pounds less than a field pumpkin.
 
-Additionaly, we still ran additional tests against Classical Linear Model assumptions. Regardless of these results, 
+Following type, year also had a very large effect on our model. 2013 was used as our base year. Each year had a relatively high coefficient compared to our other variables and was statistically significant, suggesting that there is a time-based component affecting the weight of the pumpkins. (Potential rationale for this could be changes in growing practices in the competitive cucurbit community or improving/changing genetics in the cucurbits.) All of our year coefficients were positive suggesting that the size of cucurbits had generally increased since 2013. For example, our interpretation of the 2014 variable coefficient would be as follows:
+  All else being equal, a cucurbit grown in 2014 would weigh 0.203 pounds more than a cucurbit grown in 2013.
+
+Our last group of variables was our weather variables. While most of the weather variables were statistically significant, they all had very small coefficients suggesting that their practical significance was rather limited. Furthermore, for some of the weather variables, the signs of the coefficients behave in a manner contradictory to what has been asserted in previous studies, which produces some concern about their validity. 
+ 
+One of our more interesting findings for the weather variables was in regards to our TEMP_ABOVE_MIN and TEMP_BELOW_MAX variables. As previously discussed, since literature on cucurbit growing suggests that the fruit growing is best done in temperatures between 65 F and 95 F, these two variables represent the number of days the temperature actually fell within this range. Our expectation was that the coefficient for both variables would be positive. TEMP_ABOVE_MIN followed our expectation with a positive coefficient significant at the one percent significance level. Our interpretation of the TEMP_ABOVE_MIN coefficient is as follows:
+  One additional day of max daily temperature being below the max optimal temperature for cucurbit growth increases the cucurbit weight by 0.004 pounds.  
+
+The TEMP_BELOW_MAX variable had a negative coefficient. However, it was only significant at the ten percent significance level while our cutoff was the five percent significance level. Therefore, we disregarded this result as insignificant.
+
+An additional finding for the weather variable was in regards to our TMIN_STDEV and TMAX_STDEV variables. Since cucurbits are supposed to thrive in consistent climates, we had hypothesized that the coefficients would be negative for both of these variables. TMAX_STDEV followed our expectation and is significant at the one percent significance level. Our interpretation of the TMAX_STDEV coefficient is as follows:
+  An increase in the standard deviation of the daily maximum temperature by one decreases the weight of the cucurbit by 0.007 pounds. 
+
+While the TMIN_STDEV variable deviated from our expectations with a positive coefficient, the variable coefficient was also statistically significant. Our interpretation of the TMIN_STDEV coefficient is as follows:
+  An increase in the standard deviation of the daily minimum temperature by one increases the weight of the cucurbit by 0.007 pounds. 
+
+Below is additional interpretations of the significant variable coefficients not discussed previously in this section:
+  -An increase in the TMIN_AVG temperature by one degree will decrease the weight of the cucurbit by 0.03 pounds. 
+  -An increase in the TMAX_AVG temperature by one degree will decrease the weight of the cucurbit by 0.03 pounds. 
+
 
 ```{r code }
 # model 1
