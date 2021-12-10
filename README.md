@@ -1,19 +1,19 @@
 # w203_lab2
 
 ```
-Folder Structure:
 .
 ├── README.md
-├── assignment
-│   ├── LICENSE
-│   ├── README.md
-│   ├── assignment.Rmd
-│   ├── assignment.html
-│   └── rubric.md
 └── pumpkins
-    ├── R_Code.Rmd
-    ├── data_aggregated.ipynb
+    ├── Lab\ 2\ _\ Explanatory\ Modeling.pptx
+    ├── Lab2-Final_Report-Team1.Rmd
+    ├── Lab2-Final_Report-Team1.pdf
     ├── data_preparation.ipynb
+    ├── images_for_report
+    │   ├── Data_Integration.png
+    │   ├── Data_Preparation.png
+    │   ├── causal_model.png
+    │   ├── pumpkin_acct.png
+    │   └── weather_acct.png
     ├── pumpkin.csv
     ├── pumpkin_consol.csv
     ├── research
@@ -42,6 +42,5 @@ Folder Structure:
     │       ├── readme-by_year.txt
     │       ├── readme.txt
     │       └── status-by_year.txt
-    ├── weather.csv
-    └── weather.csv.zip
+    └── weather.csv
 ```
